@@ -1,6 +1,6 @@
 import { BodyParams, Controller, MergeParams, PathParams, Post, Required } from 'ts-express-decorators';
 import { Returns } from 'ts-express-decorators/lib/swagger';
-import { NotFound, BadRequest } from 'ts-httpexceptions';
+import { BadRequest, InternalServerError, NotFound } from 'ts-httpexceptions';
 import { DbService } from '../../services/DbService.service';
 import { AttackerResponse } from '../../type/AttackerResponse';
 
@@ -19,35 +19,45 @@ export class AttackerController {
     @Required() @BodyParams('x') x: number,
     @Required() @BodyParams('y') y: number,
   ): Promise<AttackerResponse> {
+    // Board border check
+    if (x < 0 || x >= 10) {
+      throw new BadRequest('x should be in range 0 - 9.');
+    }
+    if (y < 0 || y >= 10) {
+      throw new BadRequest('y should be in range 0 - 9.');
+    }
+
     const board = await this.dbService.db.Board.findOne(boardId);
 
+    // No board found
     if (!board) {
-      // TODO: Error
-      throw new NotFound(`No board match with ${boardId}`);
+      throw new NotFound(`No board match with ${boardId}.`);
     }
     // TODO: Enum state
     if (board.state !== 'Attacking') {
       if (board.state === 'End') {
-        throw new BadRequest('Game is ended');
+        throw new BadRequest('Game is ended.');
       } else {
-        throw new BadRequest('Not ready to attack');
+        throw new BadRequest('Not ready to attack.');
       }
     }
 
-    board.move++;
+    board.moves++;
 
     const shipsCursor = this.dbService.db.Ship.find({
       board: boardId,
-      square: { x, y },
+      squares: {
+        $elemMatch: { x, y },
+      },
     });
     const count = await shipsCursor.count();
 
     if (count === 0) {
+      await board.save();
       return new AttackerResponse({ command: 'Miss' });
     }
     if (count > 1) {
-      // TODO: Error
-      throw new Error('');
+      throw new InternalServerError('Server error');
     }
 
     const [ship] = await shipsCursor.toArray();
@@ -55,7 +65,7 @@ export class AttackerController {
       return square.x === x && square.y === y;
     });
 
-    if (square) {
+    if (square.hitted) {
       return new AttackerResponse({ command: 'Same' });
     }
 
@@ -89,7 +99,7 @@ export class AttackerController {
 
       return new AttackerResponse({ command: 'Hit' });
     } catch (err) {
-      throw new Error(err);
+      throw new InternalServerError(err);
     }
   }
 }

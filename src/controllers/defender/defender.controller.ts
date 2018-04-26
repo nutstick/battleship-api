@@ -8,20 +8,6 @@ import { ShipService } from '../../services/Ship.service';
 import { DefenderResponse } from '../../type/DefenderResponse';
 import { BoardController } from '../board/board.controller';
 
-const size = {
-  battleship: 4,
-  cruisers: 3,
-  destroyers: 2,
-  submarines: 1,
-};
-
-const directionVector = {
-  up: { x: 0, y: -1 },
-  down: { x: 0, y: 1 },
-  right: { x: 1, y: 0 },
-  left: { x: -1, y: 0 },
-};
-
 const boardSize = 10;
 
 @Controller('/:boardId/defender')
@@ -60,16 +46,10 @@ export class DefenderController {
 
     board.avaliable[type]--;
 
-    // const ship = new this.shipService.Instance({});
-
-    // Generate holding square of new ship
-    const squares: ISquareDocument[] = new Array(size[type]).fill(0).map((_, index) => ({
-      x: x + directionVector[direction].x * index,
-      y: y + directionVector[direction].y * index,
-    }));
+    const ship = this.shipService.createShip(boardId, type, x, y, direction);
 
     // Boarder check
-    const boarderChecked = squares.every(({ x, y }) => {
+    const boarderChecked = ship.squares.every(({ x, y }) => {
       return 0 <= x && x < boardSize && 0 <= y && y < boardSize;
     });
     if (!boarderChecked) {
@@ -80,11 +60,11 @@ export class DefenderController {
     // Check is there is a adjacent ship in board, throw Error
     // Create an adjacent square list
     // FIXME: any
-    let adjacentSquare: any = squares
-      .concat(squares.map(({ x, y }) => ({ x: x + 1, y })))
-      .concat(squares.map(({ x, y }) => ({ x: x - 1, y })))
-      .concat(squares.map(({ x, y }) => ({ x, y: y - 1 })))
-      .concat(squares.map(({ x, y }) => ({ x, y: y + 1 })));
+    let adjacentSquare: any = ship.squares
+      .concat(ship.squares.map(({ x, y }) => ({ x: x + 1, y })))
+      .concat(ship.squares.map(({ x, y }) => ({ x: x - 1, y })))
+      .concat(ship.squares.map(({ x, y }) => ({ x, y: y - 1 })))
+      .concat(ship.squares.map(({ x, y }) => ({ x, y: y + 1 })));
     const s = new Set();
     adjacentSquare = adjacentSquare.filter(({ x , y }) => {
       if (!s.has(`${x}:${y}`)) {
@@ -94,8 +74,6 @@ export class DefenderController {
       return false;
     });
 
-    console.log(adjacentSquare);
-
     const adjacentShip = this.shipService.ship.find({
       board: boardId,
       squares: {
@@ -103,7 +81,6 @@ export class DefenderController {
       },
     });
     const countAdjacentShip = await adjacentShip.count();
-    console.log(adjacentShip);
 
     if (countAdjacentShip) {
       // TODO: Error
@@ -121,19 +98,15 @@ export class DefenderController {
     // Legal to place ship update the board data and add ship to db
     try {
       // TODO: Concerency
-      const [board_, ship] = await Promise.all([
+      const [board_, ship_] = await Promise.all([
         board.save(),
-        this.shipService.ship.insert({
-          board: boardId,
-          type,
-          squares,
-        }),
+        ship.save(),
       ]);
 
       if (countRemainingShip === 0) {
-        return new DefenderResponse('StateChange', board_, ship);
+        return new DefenderResponse('StateChange', board_, ship_);
       }
-      return new DefenderResponse('None', board_, ship);
+      return new DefenderResponse('None', board_, ship_);
     } catch (err) {
       throw new Error('');
     }
