@@ -31,7 +31,7 @@ export class Ship extends Instance<IShipDocument, Ship> implements IShipDocument
   @Property([Square], true)
   squares: ISquareDocument[];
 
-  @Property(/^(battleship|cruisers|destroyers|submarines)$/)
+  @Property(/^(battleship|cruiser|destroyer|submarine)$/)
   type: string;
 
   static onCreating(ship: IShipDocument) {

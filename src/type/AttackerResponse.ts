@@ -21,7 +21,7 @@ export class AttackerResponse {
         this.message = 'You already choose this square.';
         break;
       case 'Sank':
-        this.message = `You just sank the ${ship.type.charAt(0).toUpperCase()}${ship.type.slice(1)}`;
+        this.message = `You just sank the ${ship.type.charAt(0).toUpperCase()}${ship.type.slice(1)}.`;
         break;
       case 'Win':
         this.message = `Win !  You completed the game in ${board.moves} moves.`;

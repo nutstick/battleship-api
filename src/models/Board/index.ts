@@ -1,5 +1,4 @@
 import { Changes, Collection, Index, Instance, Model, ObjectID, Property, Transform } from 'iridium';
-import { Property as Prop } from 'ts-express-decorators';
 import { IShipDocument } from '../Ship';
 
 export interface IBoardDocument {
@@ -31,7 +30,6 @@ const ShipList = {
 @Collection('boards')
 export class Board extends Instance<IBoardDocument, Board> implements IBoardDocument {
   @ObjectID
-  @Prop()
   _id: string;
 
   @Transform(
@@ -39,37 +37,31 @@ export class Board extends Instance<IBoardDocument, Board> implements IBoardDocu
     (value) => value.toLowerCase(),
   )
   @Property(/^(start|attacking|end)$/, false)
-  // @Prop()
   state: string;
-  @Property(/^(start|attacking|end)$/, false)
-  // @Prop()
-  move: number;
+  @Property(Number)
+  moves: number;
 
   @Property(ShipList, true)
-  // @Prop()
   avaliable: IShipListDocument;
 
   @Property(ShipList, true)
-  // @Prop()
   notSank: IShipListDocument;
 
   @Property(Date, true)
-  // @Prop()
   createAt: Date;
   @Property(Date, true)
-  // @Prop()
   updateAt: Date;
 
   static onCreating(board: IBoardDocument) {
-    board.state = 'start';
-    board.moves = 0;
-    board.avaliable = {
+    board.state = board.state || 'start';
+    board.moves = board.moves || 0;
+    board.avaliable = board.avaliable || {
       battleship: 1,
       cruisers: 2,
       destroyers: 3,
       submarines: 4,
     };
-    board.notSank = {
+    board.notSank = board.notSank || {
       battleship: 1,
       cruisers: 2,
       destroyers: 3,
