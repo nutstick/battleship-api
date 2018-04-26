@@ -1,0 +1,42 @@
+{
+  "name": "battleship-api",
+  "version": "1.0.0",
+  "main": "dist/main.server.js",
+  "author": "Nuttapat Kirawittaya(nuttapat.kirawittaya@gmail.com)",
+  "license": "MIT",
+  "scripts": {
+    "mongo": "mongod --dbpath db",
+    "bundle": "./node_modules/.bin/ts-node tools/run bundle",
+    "build": "./node_modules/.bin/ts-node tools/run build",
+    "dev:watch": "nodemon -e ts -w ./src -x yarn run start",
+    "start": "./node_modules/.bin/ts-node ./src/main.server.ts",
+    "test": "NODE_ENV=test mocha -r ts-node/register \"{src,test}/**/*.test.ts\" --recursive --exit",
+    "test:watch": "npm run test -- --watch",
+    "lint": "./node_modules/.bin/tslint --project tsconfig.json src/**/*.ts?(x)"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "compression": "^1.7.2",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.16.3",
+    "express-session": "^1.15.6",
+    "iridium": "^7.2.5",
+    "method-override": "^2.3.10",
+    "morgan": "^1.9.0",
+    "nyc": "^11.7.1",
+    "path": "^0.12.7",
+    "ts-express-decorators": "^4.14.1",
+    "typescript": "^2.8.3"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.1.3",
+    "@types/mocha": "^5.2.0",
+    "@types/node": "^9.6.6",
+    "@types/supertest": "^2.0.4",
+    "chai": "^4.1.2",
+    "chokidar": "^2.0.3",
+    "mocha": "^5.1.1",
+    "supertest": "^3.0.0",
+    "ts-node": "^6.0.0"
+  }
+}
