@@ -12,7 +12,7 @@
     "start": "./node_modules/.bin/ts-node ./src/main.server.ts",
     "test": "NODE_ENV=test mocha -r ts-node/register \"{src,test}/**/*.test.ts\" --recursive --exit",
     "test:watch": "npm run test -- --watch",
-    "lint": "./node_modules/.bin/tslint --project tsconfig.json src/**/*.ts?(x)"
+    "lint": "tslint --project tsconfig.json src/**/*.ts?(x)"
   },
   "dependencies": {
     "body-parser": "^1.18.2",
