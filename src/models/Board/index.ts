@@ -15,16 +15,16 @@ export interface IBoardDocument {
 
 export interface IShipListDocument {
   battleship: number;
-  cruisers: number;
-  destroyers: number;
-  submarines: number;
+  cruiser: number;
+  destroyer: number;
+  submarine: number;
 }
 
 const ShipList = {
   battleship: Number,
-  cruisers: Number,
-  destroyers: Number,
-  submarines: Number,
+  cruiser: Number,
+  destroyer: Number,
+  submarine: Number,
 };
 
 @Collection('boards')
@@ -57,15 +57,15 @@ export class Board extends Instance<IBoardDocument, Board> implements IBoardDocu
     board.moves = board.moves || 0;
     board.avaliable = board.avaliable || {
       battleship: 1,
-      cruisers: 2,
-      destroyers: 3,
-      submarines: 4,
+      cruiser: 2,
+      destroyer: 3,
+      submarine: 4,
     };
     board.notSank = board.notSank || {
       battleship: 1,
-      cruisers: 2,
-      destroyers: 3,
-      submarines: 4,
+      cruiser: 2,
+      destroyer: 3,
+      submarine: 4,
     };
     board.createAt = new Date();
     board.updateAt = new Date();

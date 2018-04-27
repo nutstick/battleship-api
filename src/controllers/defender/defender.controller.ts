@@ -1,6 +1,6 @@
 import { BodyParams, Controller, MergeParams, PathParams, Post, Required } from 'ts-express-decorators';
 import { Returns } from 'ts-express-decorators/lib/swagger';
-import { BadRequest, NotFound } from 'ts-httpexceptions';
+import { BadRequest, InternalServerError, NotFound } from 'ts-httpexceptions';
 import { $log } from 'ts-log-debug';
 import { ISquareDocument } from '../../models/Ship';
 import { BoardService } from '../../services/Board.service';
@@ -30,7 +30,6 @@ export class DefenderController {
   ): Promise<DefenderResponse> {
     const board = await this.boardService.board.findOne(boardId);
 
-    $log.info(board.state);
     if (!board) {
       throw new NotFound('Board not found');
     }
@@ -45,6 +44,7 @@ export class DefenderController {
     }
 
     board.avaliable[type]--;
+    board.notSank[type]++;
 
     const ship = this.shipService.createShip(boardId, type, x, y, direction);
 
@@ -61,10 +61,14 @@ export class DefenderController {
     // Create an adjacent square list
     // FIXME: any
     let adjacentSquare: any = ship.squares
-      .concat(ship.squares.map(({ x, y }) => ({ x: x + 1, y })))
-      .concat(ship.squares.map(({ x, y }) => ({ x: x - 1, y })))
-      .concat(ship.squares.map(({ x, y }) => ({ x, y: y - 1 })))
-      .concat(ship.squares.map(({ x, y }) => ({ x, y: y + 1 })));
+      .concat(ship.squares.map(({ x, y }) => ({ x: x + 1, y, hitted: false })))
+      .concat(ship.squares.map(({ x, y }) => ({ x: x - 1, y, hitted: false })))
+      .concat(ship.squares.map(({ x, y }) => ({ x, y: y - 1, hitted: false })))
+      .concat(ship.squares.map(({ x, y }) => ({ x, y: y + 1, hitted: false })))
+      .concat(ship.squares.map(({ x, y }) => ({ x: x - 1, y: y - 1, hitted: false })))
+      .concat(ship.squares.map(({ x, y }) => ({ x: x - 1, y: y + 1, hitted: false })))
+      .concat(ship.squares.map(({ x, y }) => ({ x: x + 1, y: y - 1, hitted: false })))
+      .concat(ship.squares.map(({ x, y }) => ({ x: x + 1, y: y + 1, hitted: false })));
     const s = new Set();
     adjacentSquare = adjacentSquare.filter(({ x , y }) => {
       if (!s.has(`${x}:${y}`)) {
@@ -108,7 +112,7 @@ export class DefenderController {
       }
       return new DefenderResponse('None', board_, ship_);
     } catch (err) {
-      throw new Error('');
+      throw new InternalServerError('Server error.');
     }
   }
 }

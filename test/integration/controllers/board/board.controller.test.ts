@@ -82,15 +82,15 @@ describe('Board Controller', () => {
             expect(result.moves).to.equals(0);
             expect(result.avaliable).to.deep.equals({
               battleship: 1,
-              cruisers: 2,
-              destroyers: 3,
-              submarines: 4,
+              cruiser: 2,
+              destroyer: 3,
+              submarine: 4,
             });
             expect(result.notSank).to.deep.equals({
               battleship: 1,
-              cruisers: 2,
-              destroyers: 3,
-              submarines: 4,
+              cruiser: 2,
+              destroyer: 3,
+              submarine: 4,
             });
 
             done();

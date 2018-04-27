@@ -13,6 +13,7 @@ export class DefenderResponse {
       default: break;
     }
 
+    this.success = true;
     this.remainingShip = board.shipList;
   }
   @Property()

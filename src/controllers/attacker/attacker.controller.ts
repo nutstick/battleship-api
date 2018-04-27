@@ -1,14 +1,16 @@
 import { BodyParams, Controller, MergeParams, PathParams, Post, Required } from 'ts-express-decorators';
 import { Returns } from 'ts-express-decorators/lib/swagger';
 import { BadRequest, InternalServerError, NotFound } from 'ts-httpexceptions';
+import { BoardService } from '../../services/Board.service';
 import { DbService } from '../../services/DbService.service';
+import { ShipService } from '../../services/Ship.service';
 import { AttackerResponse } from '../../type/AttackerResponse';
-
 @Controller('/:boardId/attacker')
 @MergeParams()
 export class AttackerController {
   constructor(
-    private dbService: DbService,
+    private boardService: BoardService,
+    private shipService: ShipService,
   ) {
   }
 
@@ -27,11 +29,11 @@ export class AttackerController {
       throw new BadRequest('y should be in range 0 - 9.');
     }
 
-    const board = await this.dbService.db.Board.findOne(boardId);
+    const board = await this.boardService.board.findOne(boardId);
 
     // No board found
     if (!board) {
-      throw new NotFound(`No board match with ${boardId}.`);
+      throw new NotFound(`No board match with id ${boardId}.`);
     }
     // TODO: Enum state
     if (board.state !== 'Attacking') {
@@ -44,7 +46,7 @@ export class AttackerController {
 
     board.moves++;
 
-    const shipsCursor = this.dbService.db.Ship.find({
+    const shipsCursor = this.shipService.ship.find({
       board: boardId,
       squares: {
         $elemMatch: { x, y },
@@ -55,9 +57,6 @@ export class AttackerController {
     if (count === 0) {
       await board.save();
       return new AttackerResponse({ command: 'Miss' });
-    }
-    if (count > 1) {
-      throw new InternalServerError('Server error');
     }
 
     const [ship] = await shipsCursor.toArray();
@@ -72,8 +71,8 @@ export class AttackerController {
     square.hitted = true;
 
     if (ship.squares.every((square) => square.hitted)) {
-      if (board.notSank[board.type] >= 1) {
-        board.notSank[board.type]--;
+      if (board.notSank[ship.type] >= 1) {
+        board.notSank[ship.type]--;
       }
 
       const sumSankShip = Object.keys(board.notSank)
