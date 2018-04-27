@@ -6,9 +6,7 @@
   "license": "MIT",
   "scripts": {
     "mongo": "mongod --dbpath db",
-    "bundle": "./node_modules/.bin/ts-node tools/run bundle",
-    "build": "./node_modules/.bin/ts-node tools/run build",
-    "dev:watch": "nodemon -e ts -w ./src -x yarn run start",
+    "dev:watch": "nodemon -e ts -w ./src -x npm run start",
     "start": "./node_modules/.bin/ts-node ./src/main.server.ts",
     "test": "NODE_ENV=test mocha -r ts-node/register \"{src,test}/**/*.test.ts\" --recursive --exit",
     "test:watch": "npm run test -- --watch",
